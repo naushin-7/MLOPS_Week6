@@ -5,7 +5,7 @@ import joblib
 import numpy as np
 import pandas as pd
 
-app = FastAPI(title="🌸 Iris Classifier API")
+app = FastAPI(title="Iris Classifier API")
 
 # Load model
 model = joblib.load("model.joblib")
