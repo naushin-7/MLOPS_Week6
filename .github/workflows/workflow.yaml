@@ -64,5 +64,6 @@ jobs:
         REPO_TOKEN: ${{ secrets.PAT }}
       run: |
         echo "Iris API deployed to Kubernetes using Artifact Registry." > report.md
+        kubectl get pods >> report.md
         cml comment update --publish report.md
         
