@@ -36,10 +36,9 @@ jobs:
         docker build -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/iris-api:latest .
         docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/iris-api:latest
         
-    - name: Install gke-gcloud-auth-plugin
+    - name: Install gke-gcloud-auth-plugin (gcloud way)
       run: |
-        sudo apt-get update
-        sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
+        gcloud components install gke-gcloud-auth-plugin --quiet
         
     - name: Get GKE Credentials
       run: |
