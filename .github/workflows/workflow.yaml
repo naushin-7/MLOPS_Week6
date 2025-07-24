@@ -1,0 +1,50 @@
+name: Continuous Deployment - Iris API
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: main
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+        export_default_credentials: true
+
+    - name: Configure Docker for GCR
+      run: |
+        gcloud auth configure-docker
+
+    - name: Build and Push Docker Image
+      run: |
+        docker build -t ${{ secrets.GCR_REGION }}/${{ secrets.GCP_PROJECT_ID }}/iris-api:latest .
+        docker push ${{ secrets.GCR_REGION }}/${{ secrets.GCP_PROJECT_ID }}/iris-api:latest
+
+    - name: Get GKE Credentials
+      run: |
+        gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER }} --zone ${{ secrets.GKE_ZONE }}
+
+    - name: Deploy to GKE
+      run: |
+        kubectl apply -f k8s/deployment.yaml
+        kubectl apply -f k8s/service.yaml
+
+    - name: Report with CML
+      env:
+        REPO_TOKEN: ${{ secrets.PAT }}
+      run: |
+        echo "✅ Iris API deployed to Kubernetes." > report.md
+        cml comment create report.md
