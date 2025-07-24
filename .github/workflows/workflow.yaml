@@ -20,21 +20,21 @@ jobs:
     - name: Authenticate with GCP
       uses: google-github-actions/auth@v2
       with:
-          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
-      
+        credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v2
       with:
-          project_id: mindful-carport-461217-m4
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-    - name: Configure Docker for GCR
+    - name: Configure Docker for Artifact Registry
       run: |
-        gcloud auth configure-docker
+        gcloud auth configure-docker us-central1-docker.pkg.dev
 
-    - name: Build and Push Docker Image
+    - name: Build and Push Docker Image to Artifact Registry
       run: |
-        docker build -t ${{ secrets.GCR_REGION }}/${{ secrets.GCP_PROJECT_ID }}/iris-api:latest .
-        docker push ${{ secrets.GCR_REGION }}/${{ secrets.GCP_PROJECT_ID }}/iris-api:latest
+        docker build -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/iris-api/iris-api:latest .
+        docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/iris-api/iris-api:latest
 
     - name: Get GKE Credentials
       run: |
@@ -49,5 +49,5 @@ jobs:
       env:
         REPO_TOKEN: ${{ secrets.PAT }}
       run: |
-        echo "✅ Iris API deployed to Kubernetes." > report.md
+        echo "✅ Iris API deployed to Kubernetes using Artifact Registry." > report.md
         cml comment create report.md
